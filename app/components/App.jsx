@@ -2,30 +2,24 @@ import React from 'react';
 import Notes from './Notes';
 import NoteActions from '../actions/NoteActions';
 import NoteStore from '../stores/NoteStore';
+import persist from '../decorators/persist';
+import connect from '../decorators/connect';
 import storage from '../libs/storage';
 
-export default class App extends React.Component {
-  constructor(props) {
+const noteStorageName = 'notes';
+
+class App extends React.Component {
+  constructor(props: {
+    notes: Array;
+  }) {
     super(props);
 
-    this.storeChanged = this.storeChanged.bind(this);
+    NoteActions.init(storage.get(noteStorageName));
 
-    NoteActions.init(storage.get('notes'));
     this.state = NoteStore.getState();
   }
-  componentDidMount() {
-    NoteStore.listen(this.storeChanged);
-  }
-  componentWillUnmount() {
-    NoteStore.unlisten(this.storeChanged);
-  }
-  storeChanged(state) {
-    storage.set('notes', state);
-
-    this.setState(NoteStore.getState());
-  }
   render() {
-    var notes = this.state.notes;
+    var notes = this.props.notes;
 
     return (
       <div>
@@ -46,3 +40,10 @@ export default class App extends React.Component {
     }
   }
 }
+
+export default persist(
+  connect(App, NoteStore),
+  storage,
+  noteStorageName,
+  () => NoteStore.getState()
+);
