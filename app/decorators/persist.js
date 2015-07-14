@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default (Component, storage, storageName, getData) => {
+const persist = (Component, storage, storageName, getData) => {
   return class Persist extends React.Component {
     constructor(props) {
       super(props);
@@ -16,4 +16,8 @@ export default (Component, storage, storageName, getData) => {
       return <Component {...this.props} {...this.state} />;
     }
   };
+}
+
+export default (storage, storageName, getData) => {
+  return (target) => persist(target, storage, storageName, getData);
 };

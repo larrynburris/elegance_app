@@ -1,34 +1,35 @@
+import AltContainer from 'alt/AltContainer';
 import React from 'react';
 import Notes from './Notes';
 import NoteActions from '../actions/NoteActions';
 import NoteStore from '../stores/NoteStore';
 import persist from '../decorators/persist';
-import connect from '../decorators/connect';
 import storage from '../libs/storage';
 
 const noteStorageName = 'notes';
 
-class App extends React.Component {
-  constructor(props: {
-    notes: Array;
-  }) {
+@persist(storage, noteStorageName, () => NoteStore.getState())
+export default class App extends React.Component {
+  constructor(props) {
     super(props);
 
     NoteActions.init(storage.get(noteStorageName));
-
-    this.state = NoteStore.getState();
   }
   render() {
-    var notes = this.props.notes;
-
     return (
       <div>
         <button onClick={() => this.addItem()}>+</button>
-        <Notes items={notes} onEdit={this.itemEdited.bind(this)} />
+        <AltContainer
+          stores={[NoteStore]}
+          inject={ {
+            items: () => NoteStore.getState().notes || []
+          } }
+        >
+          <Notes onEdit={(id, task) => this.itemEdited(id, task)} />
+        </AltContainer>
       </div>
     );
-  }
-  addItem() {
+  }dItem() {
     NoteActions.create('New task');
   }
   itemEdited(id, task) {
@@ -40,10 +41,3 @@ class App extends React.Component {
     }
   }
 }
-
-export default persist(
-  connect(App, NoteStore),
-  storage,
-  noteStorageName,
-  () => NoteStore.getState()
-);
