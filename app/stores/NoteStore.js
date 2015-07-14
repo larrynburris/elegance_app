@@ -7,6 +7,11 @@ class NoteStore {
 
     this.notes = [];
   }
+  init(data) {
+    this.setState(Array.isArray(data && data.notes) ? data : {
+      notes: []
+    });
+  }
   create(task) {
     const notes = this.notes;
 
@@ -25,7 +30,7 @@ class NoteStore {
     const notes = this.notes;
 
     this.setState({
-      notes: notes.slice(0, id).concat(notes.slice(id +1))
+      notes: notes.slice(0, id).concat(notes.slice(id + 1))
     });
   }
 }

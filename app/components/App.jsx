@@ -2,12 +2,15 @@ import React from 'react';
 import Notes from './Notes';
 import NoteActions from '../actions/NoteActions';
 import NoteStore from '../stores/NoteStore';
+import storage from '../libs/storage';
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
 
     this.storeChanged = this.storeChanged.bind(this);
+
+    NoteActions.init(storage.get('notes'));
     this.state = NoteStore.getState();
   }
   componentDidMount() {
@@ -17,7 +20,9 @@ export default class App extends React.Component {
     NoteStore.unlisten(this.storeChanged);
   }
   storeChanged(state) {
-    this.setState(state);
+    storage.set('notes', state);
+
+    this.setState(NoteStore.getState());
   }
   render() {
     var notes = this.state.notes;
@@ -25,12 +30,12 @@ export default class App extends React.Component {
     return (
       <div>
         <button onClick={() => this.addItem()}>+</button>
-          <Notes items={notes} onEdit={(i, task) => this.itemEdited.bind(this)} />
+        <Notes items={notes} onEdit={this.itemEdited.bind(this)} />
       </div>
     );
   }
   addItem() {
-    NoteActions.created('New task');
+    NoteActions.create('New task');
   }
   itemEdited(id, task) {
     if(task) {
